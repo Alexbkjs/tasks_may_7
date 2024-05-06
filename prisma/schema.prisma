@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Define the Product model
+model Product {
+  sku            Int       @id @default(autoincrement())
+  title           String
+  description   String?
+  categories    ProductCategory[]   // A product can have multiple categories
+  warehouses    WarehouseProduct[] // Relationship to the warehouses where the product is stored
+}
+
+// Define the ProductCategory model
+model ProductCategory {
+  slug         Int       @id @default(autoincrement())
+  title       String
+  products  Product[] // Relationship to the products in this category
+}
+
+// Define the Warehouse model
+model Warehouse {
+  uuid           Int       @id @default(autoincrement())
+  title         String
+  location    String
+  products    WarehouseProduct[] // Products stored in this warehouse
+}
+
+// Define the relationship between Product and Warehouse
+model WarehouseProduct {
+  id          Int       @id @default(autoincrement())
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [uuid])
+  product     Product   @relation(fields: [productId], references: [sku])
+  quantity    Int
+  warehouseId Int
+  productId   Int
+
+  @@unique([warehouseId, productId])
+}
